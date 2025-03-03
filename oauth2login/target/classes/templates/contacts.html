@@ -1,0 +1,18 @@
+<!--templates/contacts.html-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Contacts</title>
+</head>
+<body>
+    <h1>Your Google Contacts</h1>
+    <ul>
+        <li th:each="contact : ${contacts.connections}">
+            <span th:text="${contact.names[0].displayName}"></span>
+            <span th:if="${contact.emailAddresses != null}" th:text="'(' + ${contact.emailAddresses[0].value} + ')'"></span>
+        </li>
+    </ul>
+    <a href="/user-info">Back to Profile</a>
+</body>
+</html>
+ 

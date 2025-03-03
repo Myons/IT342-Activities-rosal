@@ -1,0 +1,13 @@
+<!--templates/user-info.html-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>User Info</title>
+</head>
+<body>
+    <h1>Welcome, <span th:text="${user.name}"></span></h1>
+    <p>Email: <span th:text="${user.email}"></span></p>
+    <a href="/contacts">View Contacts</a>
+</body>
+</html>
+ 

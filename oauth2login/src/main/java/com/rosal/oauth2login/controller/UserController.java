@@ -1,16 +1,22 @@
 package com.rosal.oauth2login.controller;
 
-import java.util.Map;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-public class UserController{
+@Controller
+public class UserController {
 
     @GetMapping("/user-info")
-    public Map<String, Object>getUser(@AuthenticationPrincipal OAuth2User principal){
-        return principal.getAttributes();
+    public String userInfo(@AuthenticationPrincipal OAuth2User principal, Model model) {
+        if (principal == null) {
+            return "redirect:/";
+        }
+
+        model.addAttribute("user", principal.getAttributes());
+        return "user-info";
     }
 }
+ 
