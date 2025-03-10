@@ -1,18 +1,130 @@
-<!--templates/contacts.html-->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Contacts</title>
+    <meta charset="UTF-8">
+    <title>Google Contacts</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <style>
+        .contact-card {
+            margin-bottom: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 15px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Your Google Contacts</h1>
-    <ul>
-        <li th:each="contact : ${contacts.connections}">
-            <span th:text="${contact.names[0].displayName}"></span>
-            <span th:if="${contact.emailAddresses != null}" th:text="'(' + ${contact.emailAddresses[0].value} + ')'"></span>
-        </li>
-    </ul>
-    <a href="/user-info">Back to Profile</a>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1>Your Google Contacts</h1>
+                
+                <!-- Alert for flash messages -->
+                <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${message}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                
+                <!-- Contact stats -->
+                <div class="alert alert-info" th:if="${contacts != null}">
+                    Found <span th:text="${contacts.get('totalPeople')}">0</span> contacts
+                </div>
+                
+                <!-- Add New Contact Button -->
+                <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addContactModal">
+                    Add New Contact
+                </button>
+                
+                <!-- Contact List -->
+                <div class="row">
+                    <div th:if="${contacts != null && contacts.get('connections') != null}" class="col-12">
+                        <div th:each="contact : ${contacts.get('connections')}" class="contact-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h4 th:if="${contact.get('names') != null && !contact.get('names').empty}" 
+                                        th:text="${contact.get('names')[0].get('displayName')}">Contact Name</h4>
+                                        
+                                    <p th:if="${contact.get('emailAddresses') != null && !contact.get('emailAddresses').empty}"
+                                       th:text="${contact.get('emailAddresses')[0].get('value')}">email@example.com</p>
+                                       
+                                    <p th:if="${contact.get('phoneNumbers') != null && !contact.get('phoneNumbers').empty}"
+                                       th:text="${contact.get('phoneNumbers')[0].get('value')}">Phone Number</p>
+                                </div>
+                                <div>
+                                    <a th:href="@{'/contacts/' + ${contact.get('resourceName')}}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                    <button class="btn btn-sm btn-outline-danger delete-contact"
+                                            th:attr="data-resource-name=${contact.get('resourceName')}">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div th:if="${contacts == null || contacts.get('connections') == null || contacts.get('connections').empty}" class="col-12">
+                        <div class="alert alert-info">
+                            No contacts found. Add a new contact to get started.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Contact Modal -->
+    <div class="modal fade" id="addContactModal" tabindex="-1" aria-labelledby="addContactModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addContactModalLabel">Add New Contact</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/contacts/create}" method="post" th:object="${contactRequest}">
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstName" th:field="*{firstName}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" th:field="*{lastName}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" th:field="*{email}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="phoneNumber" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phoneNumber" th:field="*{phoneNumber}">
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Contact</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hidden form for delete operations -->
+    <form id="deleteForm" method="post" style="display: none;">
+        <input type="hidden" name="_method" value="delete"/>
+    </form>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup delete buttons
+            document.querySelectorAll('.delete-contact').forEach(button => {
+                button.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to delete this contact?')) {
+                        const resourceName = this.getAttribute('data-resource-name');
+                        const form = document.getElementById('deleteForm');
+                        form.action = '/contacts/' + resourceName;
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
- 
